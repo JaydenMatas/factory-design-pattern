@@ -3,7 +3,7 @@
 */
 
 // (3)
-// Creatord
+// Creator
 abstract class BaseCreator {
 
     public abstract createTransport(): ITransport;
@@ -13,21 +13,40 @@ abstract class BaseCreator {
         const transport = this.createTransport();
         // Now, use the transport.
         return `Base Creator: The same creator's code has just worked with ${transport.operation()}`;
+
+        // We can also do other business logic here
     }
 }
 
 // (4)
 // Concrete Creators
-class ConcreteCreator1 extends BaseCreator {
+class ConcreteCreatorLandTransport extends BaseCreator {
+    type?: string;
+
+    constructor(type?: string) {
+        super();
+        this.type = type;
+    }
+
+    // override the default and use a type to define
     public createTransport(): ITransport {
-        return new ConcreteTransport1();
+        switch (this.type) {
+            case "Truck": {
+                return new ConcreteTransportTruck();
+            }
+            case "Car": {
+                return new ConcreteTransportCar();
+            }
+            default: return new ConcreteTransportTruck();
+        }
     }
 }
 
 //(4)
-class ConcreteCreator2 extends BaseCreator {
+class ConcreteCreatorSeaTransport extends BaseCreator {
+    // original example without a type
     public createTransport(): ITransport {
-        return new ConcreteTransport2();
+        return new ConcreteTransportShip();
     }
 }
 
@@ -39,23 +58,33 @@ interface ITransport {
 
 // (2)
 // Concrete products that implement the common interface
-class ConcreteTransport1 implements ITransport {
+class ConcreteTransportTruck implements ITransport {
     public operation(): string {
-        return '{Result of the ConcreteTransport1}';
+        return '{Result of the ConcreteTransportTruck}';
     }
 }
 
 // (2)
-class ConcreteTransport2 implements ITransport {
+class ConcreteTransportCar implements ITransport {
     public operation(): string {
-        return '{Result of the ConcreteTransport2}';
+        return '{Result of the ConcreteTransportCar}';
     }
 }
 
-function clientCode(creator: BaseCreator) {
+// (2)
+class ConcreteTransportShip implements ITransport {
+    public operation(): string {
+        return '{Result of the ConcreteTransportShip}';
+    }
+}
+
+// No matter how many conrete creators / products we make
+// This client code does not need to change
+// We can continue calling the factory "someOperation" method from the base class
+function clientCode(factory: BaseCreator) {
     // ...
     console.log('Client: I\'m not aware of the creator\'s class, but it still works.');
-    console.log(creator.someOperation());
+    console.log(factory.someOperation());
     // ...
 }
 
@@ -64,9 +93,17 @@ function clientCode(creator: BaseCreator) {
  * environment. This part can differ. 
  * Another basic example is using a switch statement to pick based on a type to return
  */
-console.log('App: Launched with the ConcreteCreator1.');
-clientCode(new ConcreteCreator1());
+console.log('App: Launched with the ConcreteCreatorLandTransport with type truck');
+clientCode(new ConcreteCreatorLandTransport("Truck"));
 console.log('');
 
-console.log('App: Launched with the ConcreteCreator2.');
-clientCode(new ConcreteCreator2());
+console.log('App: Launched with the ConcreteCreatorLandTransport with no valid type provided');
+clientCode(new ConcreteCreatorLandTransport("this should default"));
+console.log('');
+
+console.log('App: Launched with the ConcreteCreatorLandTransport.');
+clientCode(new ConcreteCreatorLandTransport("Car"));
+console.log('');
+
+console.log('App: Launched with the ConcreteCreatorSeaTransport.');
+clientCode(new ConcreteCreatorSeaTransport());
